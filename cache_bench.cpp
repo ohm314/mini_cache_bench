@@ -13,6 +13,7 @@ int main(int argc, char* argv[]) {
 
   int niter = 100000;
   int nthreads = omp_get_max_threads();
+  int nsizes = (maxN - minN)/increment;
 
   float **global_a = (float**) malloc(nthreads*sizeof(float*));
   float **global_b = (float**) malloc(nthreads*sizeof(float*));
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
     for (int ithr = 0; ithr < nthreads; ++ithr) {
       auto a_arr = global_a[ithr]; 
       auto b_arr = global_b[ithr]; 
-      
+      int thread_num = omp_get_thread_num();
       
       
       float ab_dot = 0.0f;
@@ -65,9 +66,8 @@ int main(int argc, char* argv[]) {
       double bytes = (2.0*niter*sz*sizeof(float));
       double bperc = bytes/(etick - btick);
       std::chrono::duration<double> tdiff = tend - tstart;
-     
 #pragma omp critical
-      std::cout << omp_get_thread_num() << ": " << 2*sz*sizeof(float) << ", " << bperc << ", " 
+      std::cout <<  thread_num << ", " << 2*sz*sizeof(float) << ", " << bperc << ", " 
         << (bytes/1e9)/tdiff.count() << ", " << ab_dot << std::endl;
     }
   }
